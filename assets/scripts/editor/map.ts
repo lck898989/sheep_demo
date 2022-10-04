@@ -143,9 +143,8 @@ export class map extends Component {
 					const tpNode = checkNodeRes[checkNodeRes.length - 1];
 					const cardComp = tpNode.getComponent(Card);
 					console.log("检测到的卡牌的层级：", cardComp.z, " 是否显示mask: " + recover);
-					if (cardComp.z == targetZ - 1) {
-						cardComp.isCover = recover;
-					}
+					cardComp.isCover = recover;
+
 				}
 			}
 			console.log("targetZ is " + targetZ);
@@ -159,10 +158,10 @@ export class map extends Component {
 					/// 如果该行该列没有牌继续检测
 					if (this.mapItemMap[`${rowItem}-${colItem}`].length == 0) continue;
 					// 恢复的节点的层级
-					const resZ = this._checkCollision(rowItem, colItem);
+					const resZ = this._isCovered(rowItem, colItem);
 					console.log("resZ is " + resZ, "row is " + rowItem, " col is " + colItem);
 
-					if (resZ > (targetZ - 1)) {
+					if (resZ) {
 						/// 有遮挡关系
 						recoverZIndex(rowItem, colItem, true);
 					} else {
@@ -172,6 +171,28 @@ export class map extends Component {
 				}
 			}
 		}
+	}
+
+	/// row行col列的节点是否被覆盖了
+	_isCovered(row: number, col: number) {
+		const nodes = this.mapItemMap[`${row}-${col}`];
+		const z = nodes[nodes.length - 1].getComponent(Card).z;
+
+		for (let rowItem = row - 1; rowItem < row + 2; rowItem++) {
+			if (rowItem < 0 || rowItem > this.row - 1) continue;
+			for (let colItem = col - 1; colItem < col + 2; colItem++) {
+				if (colItem < 0 || colItem > this.col - 1) continue;
+				if (row == rowItem && col == colItem) continue;
+
+				const checkNodeRes = this.mapItemMap[`${rowItem}-${colItem}`];
+				/// 如果该行列对应的节点的层级比目标行列给的层级大就证明被覆盖了
+				if (checkNodeRes.length >= 1 && checkNodeRes[checkNodeRes.length - 1].getComponent(Card).z > z) {
+					console.log(`row: ${rowItem} col: ${colItem} is covered`);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/// 检查重叠情况
