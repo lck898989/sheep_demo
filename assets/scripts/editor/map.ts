@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, CCObject, Vec2, Vec3, Prefab, instantiate, EventTouch, Intersection2D } from 'cc';
+import { _decorator, Component, Node, Vec3, Prefab, instantiate, EventTouch } from 'cc';
 import { Card } from '../card';
 import { createRandom } from '../util';
 const { ccclass, property } = _decorator;
@@ -18,7 +18,6 @@ export class map extends Component {
 	@property(Node)
 	cards: Node = null;
 
-
 	private mapStart: Vec3 = new Vec3(-260, 300, 0);
 
 	private row: number = 14;
@@ -30,6 +29,7 @@ export class map extends Component {
 	private spaceX = 0;
 	private spaceY = 0;
 
+	/// 操作类型
 	private optionType: OpationType = OpationType.ADD;
 
 	private map: Vec3[][] = [];
@@ -45,7 +45,6 @@ export class map extends Component {
 
 	_initMap() {
 		console.log("init map");
-		// const mapCenterStart: Vec3 = new Vec3(-280,260,0);
 
 		for (let i = 0; i < this.row; i++) {
 			for (let j = 0; j < this.col; j++) {
@@ -58,20 +57,14 @@ export class map extends Component {
 
 				prefabNode.setPosition(pos);
 				this.mapItemMap[`${i}-${j}`] = [];
-				// this.mapItemMap[`${i}-${j}`].push(prefabNode);
 
 				prefabNode.on(Node.EventType.TOUCH_END, this.tapMapItemEnd, this);
-
-
 			}
-
 		}
 		console.log(this.mapItemMap);
 
 		if (true) {
 			console.log("asdf");
-
-
 		}
 
 	}
@@ -200,7 +193,7 @@ export class map extends Component {
 		// let isCover = false;
 		let maxZ = -999999;
 
-		/// 检查周边格子的覆盖状态 获取周边各自的最高层级，新加上的各自的层级在此基础上加一
+		/// 检查周边格子的覆盖状态 获取周边格子的最高层级，新加上的各自的层级在此基础上加一
 		for (let rowItem = row - 1; rowItem < row + 2; rowItem++) {
 			if (rowItem < 0 || rowItem > this.row - 1) continue;
 			for (let colItem = col - 1; colItem < col + 2; colItem++) {
@@ -238,12 +231,16 @@ export class map extends Component {
 	}
 
 	hideMap() {
-		this.node.active = false
+		this.node.active = !this.node.active;
 	}
 
 	addMapCallback() {
 		console.log("add");
 		this.optionType = OpationType.ADD;
+	}
+
+	exportData() {
+		console.log("导出数据");
 	}
 
 	_initMapType() {
