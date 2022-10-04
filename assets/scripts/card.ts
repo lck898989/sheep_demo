@@ -9,6 +9,31 @@ export class Card extends BaseComp {
     private type: Component = null;
     private mask: Component = null;
 
+    /// 是否被覆盖
+    private _isCover: boolean = false;
+
+    private _z: number = 0;
+
+    public set z(value: number) {
+        this._z = value;
+    }
+
+    public get z() {
+        return this._z;
+    }
+
+    public set isCover(value: boolean) {
+        this._isCover = value;
+        if (this.mask) {
+            this.mask.node.active = value;
+        }
+
+    }
+
+    public get isCover() {
+        return this._isCover;
+    }
+
     @property(SpriteAtlas)
     cardAtlas: SpriteAtlas = null;
 
@@ -22,7 +47,7 @@ export class Card extends BaseComp {
     }
 
     update(deltaTime: number) {
-        
+
     }
 
     setType(type: string) {
@@ -30,5 +55,7 @@ export class Card extends BaseComp {
         this.type.node.getComponent(Sprite).spriteFrame = frame;
 
     }
+
+
 }
 
