@@ -630,6 +630,13 @@
     "cards": {
       "__id__": 13
     },
+    "levelJson": [
+      {
+        "__uuid__": "33c67f3f-a02e-40d9-8d81-c8565ebfea96",
+        "__expectedType__": "cc.JsonAsset"
+      }
+    ],
+    "curLevel": 0,
     "_id": "10BrWHAm1Hx7S5k+tqteEP"
   },
   {

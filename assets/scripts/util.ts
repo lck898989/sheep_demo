@@ -10,7 +10,7 @@ import { DEBUG } from "cc/env";
  */
 export function debugLog(tag: string, ...log: any[]) {
     if (DEBUG) {
-        console.log.call(null, `[DEBUG]: ${tag}`,...log);
+        console.log.call(null, `[DEBUG]: ${tag}`, ...log);
     }
 }
 /**
@@ -19,7 +19,7 @@ export function debugLog(tag: string, ...log: any[]) {
  */
 export async function sleep(time: number) {
     return new Promise((resolve) => {
-        setTimeout(resolve,time);
+        setTimeout(resolve, time);
     })
 }
 
@@ -29,7 +29,7 @@ export async function sleep(time: number) {
  * @param  {number} max
  * @returns number
  */
-export function createRandom(min: number,max: number): number {
+export function createRandom(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min) + min);
 }
 
@@ -39,10 +39,10 @@ export function createRandom(min: number,max: number): number {
  * @param  {number} max
  * @param  {number} wantNumber 目标值
  */
-export function createRandomTowardTarget(min: number,max: number,wantNumber: number) {
+export function createRandomTowardTarget(min: number, max: number, wantNumber: number) {
     const random = Math.floor(Math.random() * (max - min) * 100 + min * 100);
 
-    if(random > (min * 100) && random < (max - 2) * 100) {
+    if (random > (min * 100) && random < (max - 2) * 100) {
         return wantNumber;
     } else {
         return Math.floor(random / 100);
@@ -98,9 +98,9 @@ export function loopAnimation(node: Node, animationName: string) {
  * @param  {Node} node
  */
 export function stopCurAnimation(node: Node) {
-    if(node) {
+    if (node) {
         const animComp = node.getComponent(Animation);
-        if(!animComp) return;
+        if (!animComp) return;
         animComp.stop();
     }
 }
@@ -140,7 +140,7 @@ export function smoothTransitionSpAnimation(
     isLoop: boolean = true
 ) {
     /** 过渡到目标动画循环播放 */
-    
+
     // sp.loop = isLoop;
     // sp.setMix(fromAnimation, toAnimation, delay);
     // sp.animation = toAnimation;
@@ -156,7 +156,7 @@ export function smoothTransitionSpAnimation(
  * @param  {string} animationName 动画名称
  * @param  {number=1} playTime 播放次数 默认1次 0：无限循环 >0：播放制定的次数
  */
-export async function playDragonBonesAnim(dragonbone: dragonBones.ArmatureDisplay,animationName: string,playTime: number = 1) {
+export async function playDragonBonesAnim(dragonbone: dragonBones.ArmatureDisplay, animationName: string, playTime: number = 1) {
     // if(playTime === 0) {
     //     dragonbone.playAnimation(animationName,playTime);
     // } else {
@@ -215,7 +215,7 @@ export function deepClone(obj) {
 //     return new Promise((resolve) => {
 //         tween(node)(0.0001,times).call(resolve).start();
 //     });
-    
+
 // }
 
 export function getMaxInArr(arr: number[]) {
@@ -232,4 +232,27 @@ export function getMinInArr(arr: number[]) {
  */
 export function radianToAngle(rad: number) {
     return rad * 180 / Math.PI;
+}
+
+export function shuffleSimple<T>(arr: T[]) {
+    for (let i = 0; i < arr.length; i++) {
+        let random = createRandom(0, arr.length);
+        let temp = arr[random];
+        arr[random] = arr[i];
+        arr[i] = temp;
+    }
+    return arr;
+}
+
+// 复杂一点的洗牌
+export function shuffle<T>(arr: T[]) {
+    let currentIndex = arr.length, randomIndex;
+    while (currentIndex != 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
+    }
+
+    return arr;
 }

@@ -1,6 +1,6 @@
-import { _decorator, Component, Node, Vec3, Prefab, instantiate, EventTouch } from 'cc';
+import { _decorator, Component, Node, Vec3, Prefab, instantiate, EventTouch, JsonAsset, CCInteger } from 'cc';
 import { Card } from '../card';
-import { createRandom } from '../util';
+import { createRandom, shuffle } from '../util';
 const { ccclass, property } = _decorator;
 
 export enum OpationType {
@@ -18,7 +18,16 @@ export class map extends Component {
 	@property(Node)
 	cards: Node = null;
 
+	@property({
+		type: [JsonAsset]
+	})
+	levelJson: JsonAsset[] = [];
+
+	@property(CCInteger)
+	curLevel: number = 0;
+
 	private mapStart: Vec3 = new Vec3(-260, 300, 0);
+
 
 	private row: number = 14;
 	private col: number = 14;
@@ -29,6 +38,7 @@ export class map extends Component {
 	private spaceX = 0;
 	private spaceY = 0;
 
+
 	/// 操作类型
 	private optionType: OpationType = OpationType.ADD;
 
@@ -36,11 +46,45 @@ export class map extends Component {
 
 	private mapItemMap: { [key: string]: Node[] } = {};
 
-	private randomType: string[] = ["typeA", "typeB", "typeC", "typeD", "typeE", "typeF", "typeG"];
+	private typeArr: string[] = [];
 
-	start() {
+
+	async onLoad() {
 		this._initMap();
+		await this._initCardTypeArr();
+	}
 
+	/// 生成可以消除的3的倍数的卡牌
+	async _initCardTypeArr() {
+		const levelConfig: JsonAsset = this.levelJson[this.curLevel];
+		const total = levelConfig.json["type_count"]
+		const typeACount = levelConfig.json['typeA'];
+		const typeBCount = levelConfig.json['typeB'];
+		const typeCCount = levelConfig.json['typeC'];
+		const typeDCount = levelConfig.json['typeD'];
+		const typeECount = levelConfig.json['typeE'];
+		const typeFCount = levelConfig.json['typeF'];
+
+		this._createType(typeACount, "typeA");
+		this._createType(typeBCount, "typeB");
+		this._createType(typeCCount, "typeC");
+		this._createType(typeDCount, "typeD");
+		this._createType(typeECount, "typeE");
+		this._createType(typeFCount, "typeF");
+
+		this._shuffle(this.typeArr);
+		console.log("typeArr is ", this.typeArr);
+	}
+
+	_createType(count: number, type: string) {
+		for (let i = 0; i < count; i++) {
+			this.typeArr.push(type);
+		}
+	}
+
+	/// 乱序
+	_shuffle(typeArr: string[]) {
+		shuffle(typeArr);
 	}
 
 	_initMap() {
@@ -88,6 +132,8 @@ export class map extends Component {
 
 		if (this.optionType == OpationType.ADD) {
 
+			let typeStr = this.typeArr.pop();
+			if (!typeStr) return;
 			const card = instantiate(this.cartItem);
 			this.cards.addChild(card);
 			card.setPosition(target.position);
@@ -97,7 +143,9 @@ export class map extends Component {
 			this.mapItemMap[`${row}-${col}`].push(card);
 
 			const cardComp: Card = card.getComponent(Card);
-			cardComp.setType(this.randomType[createRandom(0, 7)]);
+
+			console.log("typeStr is ", typeStr);
+			cardComp.setType(typeStr);
 			cardComp.isCover = false;
 			if (maxZ < 0) {
 				cardComp.z = 0;
