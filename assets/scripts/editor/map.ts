@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Vec3, Prefab, instantiate, EventTouch, JsonAsset, CCInteger } from 'cc';
+import { _decorator, Component, Node, Vec3, Prefab, instantiate, EventTouch, JsonAsset, CCInteger, sys, BloomStage } from 'cc';
 import { Card } from '../card';
 import { createRandom, shuffle } from '../util';
 const { ccclass, property } = _decorator;
@@ -143,6 +143,8 @@ export class map extends Component {
 			this.mapItemMap[`${row}-${col}`].push(card);
 
 			const cardComp: Card = card.getComponent(Card);
+			cardComp.row = row;
+			cardComp.col = col;
 
 			console.log("typeStr is ", typeStr);
 			cardComp.setType(typeStr);
@@ -289,6 +291,43 @@ export class map extends Component {
 
 	exportData() {
 		console.log("导出数据");
+		const keys = Object.keys(this.mapItemMap);
+		let data = [];
+		keys.forEach(item => {
+			const nodes = this.mapItemMap[item];
+			nodes.forEach(item => {
+				const cardComp: Card = item.getComponent(Card);
+				data.push({
+					row: cardComp.row,
+					col: cardComp.col,
+					type: cardComp.showType,
+					z: cardComp.z,
+					isCover: cardComp.isCover
+				});
+			});
+		});
+		console.log(data);
+		this._saveForBrowser(JSON.stringify(data));
+	}
+
+	_saveForBrowser(jsonStrData: string, fileName: string = "map") {
+		if (sys.isBrowser) {
+			let textFileBlob = new Blob([jsonStrData], { type: "application/json" });
+			let downloadLink = document.createElement("a");
+			downloadLink.download = fileName;
+			downloadLink.innerHTML = "downloadFile";
+			if (window.webkitURL != null) {
+				downloadLink.href = window.webkitURL.createObjectURL(textFileBlob);
+			} else {
+				downloadLink.href = window.URL.createObjectURL(textFileBlob);
+				downloadLink.onclick = () => {
+					downloadLink.remove();
+				};
+				downloadLink.style.display = "none";
+				document.body.appendChild(downloadLink);
+			}
+			downloadLink.click();
+		}
 	}
 
 	_initMapType() {

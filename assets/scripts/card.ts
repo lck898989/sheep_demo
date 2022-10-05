@@ -9,6 +9,11 @@ export class Card extends BaseComp {
     private type: Component = null;
     private mask: Component = null;
 
+    private _row: number = 0;
+    private _col: number = 0;
+    /// 展示的类型
+    public showType: String = "";
+
     /// 是否被覆盖
     private _isCover: boolean = false;
 
@@ -20,6 +25,22 @@ export class Card extends BaseComp {
 
     public get z() {
         return this._z;
+    }
+
+    public get row() {
+        return this._row
+    }
+
+    public set col(colValue: number) {
+        this._col = colValue;
+    }
+
+    public set row(rowValue: number) {
+        this._row = rowValue;
+    }
+
+    public get col() {
+        return this._col;
     }
 
     public set isCover(value: boolean) {
@@ -51,6 +72,7 @@ export class Card extends BaseComp {
     }
 
     setType(type: string) {
+        this.showType = type;
         const frame: SpriteFrame = this.cardAtlas.getSpriteFrame(type);
         this.type.node.getComponent(Sprite).spriteFrame = frame;
 
