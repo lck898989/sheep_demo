@@ -1,5 +1,7 @@
-import { _decorator, Component, Node, Vec3, Prefab, instantiate, EventTouch, JsonAsset, CCInteger, sys, BloomStage } from 'cc';
+import { _decorator, Component, Node, Vec3, Prefab, instantiate, EventTouch, JsonAsset, CCInteger, sys, BloomStage, director } from 'cc';
 import { Card } from '../card';
+import { Consts } from '../consts/Const';
+import { GameManager } from '../gameManager';
 import { createRandom, shuffle } from '../util';
 const { ccclass, property } = _decorator;
 
@@ -26,18 +28,6 @@ export class map extends Component {
 	@property(CCInteger)
 	curLevel: number = 0;
 
-	private mapStart: Vec3 = new Vec3(-260, 300, 0);
-
-
-	private row: number = 14;
-	private col: number = 14;
-
-	private mapWidth = 40;
-	private mapHeight = 40;
-
-	private spaceX = 0;
-	private spaceY = 0;
-
 
 	/// 操作类型
 	private optionType: OpationType = OpationType.ADD;
@@ -49,7 +39,13 @@ export class map extends Component {
 	private typeArr: string[] = [];
 
 
-	async onLoad() {
+	async start() {
+		if (GameManager.getInstance().game.isEditor) {
+			this.node.parent.active = true;
+		} else {
+			this.node.parent.active = false;
+			return;
+		}
 		this._initMap();
 		await this._initCardTypeArr();
 	}
@@ -90,14 +86,14 @@ export class map extends Component {
 	_initMap() {
 		console.log("init map");
 
-		for (let i = 0; i < this.row; i++) {
-			for (let j = 0; j < this.col; j++) {
+		for (let i = 0; i < Consts.row; i++) {
+			for (let j = 0; j < Consts.col; j++) {
 				// if(j % 2 == 1) continue;
 				const prefabNode = instantiate(this.mapItem);
-				const x = this.mapStart.x + j * this.mapWidth + this.spaceX * j;
-				const y = this.mapStart.y - i * this.mapHeight - this.spaceY * i;
+				const x = Consts.mapStart.x + j * Consts.mapWidth + Consts.spaceX * j;
+				const y = Consts.mapStart.y - i * Consts.mapHeight - Consts.spaceY * i;
 				this.node.addChild(prefabNode);
-				const pos: Vec3 = new Vec3(x, y, this.mapStart.z);
+				const pos: Vec3 = new Vec3(x, y, Consts.mapStart.z);
 
 				prefabNode.setPosition(pos);
 				this.mapItemMap[`${i}-${j}`] = [];
@@ -107,15 +103,12 @@ export class map extends Component {
 		}
 		console.log(this.mapItemMap);
 
-		if (true) {
-			console.log("asdf");
-		}
 
 	}
 
 	getRowColInfo(x: number, y: number): number[] {
-		const row = (this.mapStart.y - y) / (this.mapHeight + this.spaceY);
-		const col = (x - this.mapStart.x) / (this.mapWidth + this.spaceX);
+		const row = (Consts.mapStart.y - y) / (Consts.mapHeight + Consts.spaceY);
+		const col = (x - Consts.mapStart.x) / (Consts.mapWidth + Consts.spaceX);
 		console.log(`row is ${row} col is ${col}`);
 		return [row, col];
 	}
@@ -193,9 +186,9 @@ export class map extends Component {
 			console.log("targetZ is " + targetZ);
 			/// 上面压的牌弹出了，恢复底下牌的遮挡关系
 			for (let rowItem = row - 1; rowItem < row + 2; rowItem++) {
-				if (rowItem < 0 || rowItem > this.row - 1) continue;
+				if (rowItem < 0 || rowItem > Consts.row - 1) continue;
 				for (let colItem = col - 1; colItem < col + 2; colItem++) {
-					if (colItem < 0 || colItem > this.col - 1) continue;
+					if (colItem < 0 || colItem > Consts.col - 1) continue;
 					if (rowItem == row && colItem == col) continue;
 
 					/// 如果该行该列没有牌继续检测
@@ -222,9 +215,9 @@ export class map extends Component {
 		const z = nodes[nodes.length - 1].getComponent(Card).z;
 
 		for (let rowItem = row - 1; rowItem < row + 2; rowItem++) {
-			if (rowItem < 0 || rowItem > this.row - 1) continue;
+			if (rowItem < 0 || rowItem > Consts.row - 1) continue;
 			for (let colItem = col - 1; colItem < col + 2; colItem++) {
-				if (colItem < 0 || colItem > this.col - 1) continue;
+				if (colItem < 0 || colItem > Consts.col - 1) continue;
 				if (row == rowItem && col == colItem) continue;
 
 				const checkNodeRes = this.mapItemMap[`${rowItem}-${colItem}`];
@@ -245,9 +238,9 @@ export class map extends Component {
 
 		/// 检查周边格子的覆盖状态 获取周边格子的最高层级，新加上的各自的层级在此基础上加一
 		for (let rowItem = row - 1; rowItem < row + 2; rowItem++) {
-			if (rowItem < 0 || rowItem > this.row - 1) continue;
+			if (rowItem < 0 || rowItem > Consts.row - 1) continue;
 			for (let colItem = col - 1; colItem < col + 2; colItem++) {
-				if (colItem < 0 || colItem > this.col - 1) continue;
+				if (colItem < 0 || colItem > Consts.col - 1) continue;
 
 				const checkNodeRes = this.mapItemMap[`${rowItem}-${colItem}`];
 				if (checkNodeRes.length >= 1) {
@@ -287,6 +280,11 @@ export class map extends Component {
 	addMapCallback() {
 		console.log("add");
 		this.optionType = OpationType.ADD;
+	}
+
+	goGame() {
+		GameManager.getInstance().game.isEditor = false;
+		director.loadScene("game");
 	}
 
 	exportData() {

@@ -64,7 +64,6 @@ export class Card extends BaseComp {
     }
 
     start() {
-        console.log(this);
     }
 
     update(deltaTime: number) {
